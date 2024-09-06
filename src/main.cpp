@@ -15,6 +15,8 @@ int lastButtonState1 = LOW;
 int buttonState2 = LOW;
 int lastButtonState2 = LOW;
 
+int previousPotentioValMap = -1;
+
 int potentioVal;
 
 void setup() {
@@ -36,9 +38,11 @@ void debounceButton(int buttonPin, int &buttonState, int &lastButtonState, unsig
     if (reading != buttonState) {
       buttonState = reading;
       if (buttonState == HIGH) {
-        Serial.print("Button ");
-        Serial.print(buttonPin);
-        Serial.println(" pressed");
+        if (buttonPin == button1) {
+          Serial.println("Left");
+        } else if (buttonPin == button2) {
+          Serial.println("Right");
+        }
       }
     }
   }
@@ -46,13 +50,19 @@ void debounceButton(int buttonPin, int &buttonState, int &lastButtonState, unsig
   lastButtonState = reading;
 }
 
-void potentioPWM(){
-  potentioVal=analogRead(pwm);
+void potentioPWM() {
+  const int threshold = 5; // Define a threshold value
+  potentioVal = analogRead(pwm);
   int potentioValMap;
-  potentioValMap=map(potentioVal,0,660,0,255);
-  Serial.println(potentioValMap);
+  potentioValMap = map(potentioVal, 0, 803, 0, 255);
   
+  // Check if the change exceeds the threshold
+  if (abs(potentioValMap - previousPotentioValMap) > threshold) {
+    Serial.println(potentioValMap);
+    previousPotentioValMap = potentioValMap; // Update the previous value
+  }
   
+  delay(150);
 }
 
 void loop() {
